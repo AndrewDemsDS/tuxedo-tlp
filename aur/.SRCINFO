@@ -1,0 +1,17 @@
+pkgbase = tuxedo-tlp-git
+	pkgdesc = TLP battery-care plugin for TUXEDO laptops on the Uniwill EC path (e.g. InfinityBook Pro AMD Gen9)
+	pkgver = r1.1d7e7bc
+	pkgrel = 1
+	url = https://github.com/AndrewDemsDS/tuxedo-tlp
+	install = tuxedo-tlp-git.install
+	arch = any
+	license = MIT
+	depends = tlp
+	depends = tuxedo-drivers-dkms
+	provides = tuxedo-tlp
+	conflicts = tuxedo-tlp
+	backup = etc/tlp.d/01-tuxedo-charge.conf
+	source = tuxedo-tlp-git::git+https://github.com/AndrewDemsDS/tuxedo-tlp.git
+	sha256sums = SKIP
+
+pkgname = tuxedo-tlp-git

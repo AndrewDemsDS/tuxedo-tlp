@@ -1,0 +1,38 @@
+_chg=/sys/devices/platform/tuxedo_keyboard/charging_profile/charging_profile
+
+_try_bind_uniwill_wmi() {
+    # Best-effort live fix for the uniwill_wmi vs uniwill_laptop WMI GUID
+    # conflict, so the plugin works without a reboot on a freshly installed
+    # tuxedo-drivers-dkms. Safe to attempt: both modules reload cleanly.
+    [ -e "$_chg" ] && return 0
+    if lsmod 2>/dev/null | grep -q '^uniwill_laptop '; then
+        rmmod uniwill_laptop 2>/dev/null
+    fi
+    modprobe uniwill_wmi 2>/dev/null
+    [ -e "$_chg" ]
+}
+
+post_install() {
+    if _try_bind_uniwill_wmi; then
+        tlp start >/dev/null 2>&1
+        cat <<'EOF'
+==> tuxedo-tlp: active. Charge ceiling set to 80% (stationary).
+==> Edit STOP_CHARGE_THRESH_BAT0 in /etc/tlp.d/01-tuxedo-charge.conf (80/90/100) and
+==> run `sudo tlp start` to change it. Verify with: tlp-stat -b
+EOF
+    else
+        cat <<'EOF'
+==> tuxedo-tlp: installed, but the charging_profile sysfs node isn't present yet.
+==> This EC feature needs the uniwill_wmi kernel module bound instead of the
+==> conflicting in-tree uniwill_laptop module. Reboot to pick it up automatically
+==> (tuxedo-drivers-dkms ships the required modprobe blacklist), then check with:
+==>   tlp-stat -b
+==> If it's still missing after a reboot, this board's EC likely doesn't expose
+==> charging_profile at all -- see the Caveats section in the README.
+EOF
+    fi
+}
+
+post_upgrade() {
+    post_install
+}
