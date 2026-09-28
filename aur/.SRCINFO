@@ -1,6 +1,6 @@
 pkgbase = tuxedo-tlp-git
 	pkgdesc = TLP battery-care plugin for TUXEDO laptops on the Uniwill EC path (e.g. InfinityBook Pro AMD Gen9)
-	pkgver = r1.1d7e7bc
+	pkgver = r3.7c78e4c
 	pkgrel = 1
 	url = https://github.com/AndrewDemsDS/tuxedo-tlp
 	install = tuxedo-tlp-git.install
@@ -8,9 +8,15 @@ pkgbase = tuxedo-tlp-git
 	license = MIT
 	depends = tlp
 	depends = tuxedo-drivers-dkms
+	depends = python
+	depends = glib2
+	depends = systemd
+	optdepends = tlp-pd: power profile D-Bus API that tuxedo-tlp-tcc-sync follows
+	optdepends = tuxedo-control-center-bin: fan and brightness side of the power-saver mirror
 	provides = tuxedo-tlp
 	conflicts = tuxedo-tlp
 	backup = etc/tlp.d/01-tuxedo-charge.conf
+	backup = etc/tlp.d/02-tuxedo-powersave-extreme.conf
 	source = tuxedo-tlp-git::git+https://github.com/AndrewDemsDS/tuxedo-tlp.git
 	sha256sums = SKIP
 
