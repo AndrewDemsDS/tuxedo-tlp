@@ -101,6 +101,38 @@ one enum knob, not an independent start/stop pair. `80`/`90`/`100` are the only 
 `STOP_CHARGE_THRESH` values; anything else is rejected the same way TLP rejects an
 out-of-range value on any other plugin.
 
+## Power-saver mirrors TCC's "Powersave extreme"
+
+TUXEDO Control Center and TLP both want to own the CPU. Left alone, `tccd`'s CpuWorker
+checks EPP and frequency limits every minute and rewrites them to its active profile,
+undoing whatever TLP applied. Split the work like this:
+
+- **TLP owns the CPU.** Turn off TCC's CPU control (TCC GUI: Settings > CPU settings, or
+  `"cpuSettingsEnabled":false` in `/etc/tcc/settings` with `tccd` stopped).
+- **TCC keeps fans, ODM profile, keyboard backlight and display brightness.**
+
+TCC's legacy "Powersave extreme" profile pins the CPU's max frequency to its minimum,
+sets silent fans and drops the display to 60%. `tlp.d/02-tuxedo-powersave-extreme.conf`
+applies the CPU half of that in TLP's power-saver profile (`_ON_SAV`), and also sets
+explicit limits for balanced/performance so the cap is lifted when you leave power-saver.
+The frequencies in that file are for the 8845HS; check yours with
+`cat /sys/devices/system/cpu/cpu0/cpufreq/{cpuinfo_min_freq,amd_pstate_max_freq}`.
+
+`tuxedo-tlp-tcc-sync` handles fans and brightness. It follows `tlp-pd`'s
+`ActiveProfile` over D-Bus and asks `tccd` for the "Powersave extreme" temp profile while
+TLP is in power-saver, and for the profile TCC's own power-source map picks otherwise. It
+rechecks a few seconds after every change (`tccd` resets its temp profile on AC/battery
+switches, racing TLP's own auto-switch) and every 60 seconds.
+
+```sh
+sudo systemctl enable --now tuxedo-tlp-tcc-sync.service
+powerprofilesctl set power-saver   # or the KDE/GNOME power applet
+journalctl -u tuxedo-tlp-tcc-sync
+```
+
+`TCC_SAV_PROFILE` in the unit's environment picks a different TCC profile id. Leaving
+power-saver does not restore brightness, because TCC's default profile doesn't set one.
+
 ## Caveats
 
 - Verified on exactly one board (InfinityBook Pro AMD Gen9, `GXxHRXx`). Other Uniwill
@@ -131,7 +163,8 @@ This project (the plugin, the writeup, and the reverse-engineering of the
 `uniwill_wmi`/`uniwill_laptop` conflict) was developed with AI assistance (Claude Code),
 working from `tuxedo-drivers`' GPL kernel source and live verification on the reference
 machine. I reviewed and tested the plugin (including a live `tlp setcharge` round trip)
-before committing it.
+before committing it. The TCC power-saver sync was written the same way and tested by
+cycling power profiles on the reference machine.
 
 ## License
 

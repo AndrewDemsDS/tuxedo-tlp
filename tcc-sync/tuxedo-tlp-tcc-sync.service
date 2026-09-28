@@ -1,0 +1,17 @@
+[Unit]
+Description=Follow TLP's power profile with a TUXEDO Control Center profile
+After=tccd.service tlp.service tlp-pd.service
+Wants=tlp-pd.service
+
+[Service]
+ExecStart=/usr/bin/tuxedo-tlp-tcc-sync
+Restart=always
+RestartSec=5
+DynamicUser=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

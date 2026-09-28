@@ -6,10 +6,12 @@ pkgdesc="TLP battery-care plugin for TUXEDO laptops on the Uniwill EC path (e.g.
 arch=('any')
 url="https://github.com/AndrewDemsDS/tuxedo-tlp"
 license=('MIT')
-depends=('tlp' 'tuxedo-drivers-dkms')
+depends=('tlp' 'tuxedo-drivers-dkms' 'python' 'glib2' 'systemd')
+optdepends=('tlp-pd: power profile D-Bus API that tuxedo-tlp-tcc-sync follows'
+            'tuxedo-control-center-bin: fan and brightness side of the power-saver mirror')
 provides=('tuxedo-tlp')
 conflicts=('tuxedo-tlp')
-backup=('etc/tlp.d/01-tuxedo-charge.conf')
+backup=('etc/tlp.d/01-tuxedo-charge.conf' 'etc/tlp.d/02-tuxedo-powersave-extreme.conf')
 source=("$pkgname::git+https://github.com/AndrewDemsDS/tuxedo-tlp.git")
 sha256sums=('SKIP')
 install=tuxedo-tlp-git.install
@@ -23,6 +25,9 @@ package() {
     cd "$srcdir/$pkgname"
     install -Dm644 tlp/bat.d/65-tuxedo-uniwill "$pkgdir/usr/share/tlp/bat.d/65-tuxedo-uniwill"
     install -Dm644 tlp.d/01-tuxedo-charge.conf "$pkgdir/etc/tlp.d/01-tuxedo-charge.conf"
+    install -Dm644 tlp.d/02-tuxedo-powersave-extreme.conf "$pkgdir/etc/tlp.d/02-tuxedo-powersave-extreme.conf"
+    install -Dm755 tcc-sync/tuxedo-tlp-tcc-sync "$pkgdir/usr/bin/tuxedo-tlp-tcc-sync"
+    install -Dm644 tcc-sync/tuxedo-tlp-tcc-sync.service "$pkgdir/usr/lib/systemd/system/tuxedo-tlp-tcc-sync.service"
     install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
 }
