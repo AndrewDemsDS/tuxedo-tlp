@@ -40,6 +40,8 @@ _tcc_hint() {
 ==> the CPU (/etc/tlp.d/02-tuxedo-powersave-extreme.conf). To also switch TCC's fans and
 ==> brightness, turn off TCC's CPU control (TCC GUI: Settings > CPU settings) and run:
 ==>   sudo systemctl enable --now tuxedo-tlp-tcc-sync.service
+==> Using tuxedo-controld (tuxedo-control) instead of TCC? Enable this one instead:
+==>   sudo systemctl enable --now tuxedo-tlp-controld-sync.service
 EOF
 }
 

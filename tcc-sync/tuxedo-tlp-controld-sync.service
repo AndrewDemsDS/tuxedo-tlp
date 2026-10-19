@@ -1,0 +1,18 @@
+[Unit]
+Description=Follow TLP's power profile with a tuxedo-controld profile
+After=tuxedo-control.service tlp.service tlp-pd.service
+Wants=tlp-pd.service
+Requires=tuxedo-control.service
+
+[Service]
+ExecStart=/usr/bin/tuxedo-tlp-controld-sync
+Restart=always
+RestartSec=5
+DynamicUser=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

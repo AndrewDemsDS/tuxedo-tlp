@@ -133,6 +133,28 @@ journalctl -u tuxedo-tlp-tcc-sync
 `TCC_SAV_PROFILE` in the unit's environment picks a different TCC profile id. Leaving
 power-saver does not restore brightness, because TCC's default profile doesn't set one.
 
+### With tuxedo-controld instead of TCC
+
+If [`tuxedo-control`](https://github.com/AndrewDemsDS/tuxedo-control-nix) runs the fans in
+place of `tccd`, use `tuxedo-tlp-controld-sync` instead. It follows the same `tlp-pd`
+`ActiveProfile` and activates a `tuxedo-controld` profile over `/run/tuxedo-control.sock`:
+
+| TLP profile   | tuxedo-controld profile |
+|---------------|-------------------------|
+| `power-saver` | Max Energy Save         |
+| `balanced`    | Quiet                   |
+| `performance` | High Performance        |
+
+```sh
+sudo systemctl disable --now tccd tuxedo-tlp-tcc-sync   # one fan controller at a time
+sudo systemctl enable --now tuxedo-control tuxedo-tlp-controld-sync
+```
+
+`CONTROLD_SAV`, `CONTROLD_BAL` and `CONTROLD_PERF` in the unit's environment change the
+mapping (`systemctl edit tuxedo-tlp-controld-sync`). The helper only switches when TLP's
+profile changes, so a profile picked in the GUI holds until the next TLP switch. Leave
+`charge` unset in controld profiles: TLP owns the charge ceiling.
+
 ## Caveats
 
 - Verified on exactly one board (InfinityBook Pro AMD Gen9, `GXxHRXx`). Other Uniwill

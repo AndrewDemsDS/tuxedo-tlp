@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+# tuxedo-tlp-controld-sync - follow TLP's power profile with a tuxedo-controld profile.
+#
+# Same split as tuxedo-tlp-tcc-sync, with tuxedo-controld (tuxedo-control-nix) in
+# place of TCC's tccd: TLP owns the CPU and the charge ceiling, tuxedo-controld
+# owns fans, the EC performance mode and the keyboard backlight.
+#
+# When tlp-pd's ActiveProfile changes, this activates the mapped controld
+# profile. It only acts when TLP's profile differs from the last one it
+# applied, so a profile picked by hand in the GUI stays until TLP switches
+# again. A failed sync (daemon not up yet) is retried on the next poll.
+#
+# Mapping (environment, defaults are tuxedo-controld built-ins):
+#   CONTROLD_SAV  power-saver  -> "Max Energy Save"
+#   CONTROLD_BAL  balanced     -> "Quiet"
+#   CONTROLD_PERF performance  -> "High Performance"
+#
+# SPDX-License-Identifier: MIT
+
+import json
+import os
+import select
+import socket
+import subprocess
+import sys
+import time
+
+PPD = ["net.hadess.PowerProfiles", "/net/hadess/PowerProfiles", "net.hadess.PowerProfiles"]
+SOCK = os.environ.get("CONTROLD_SOCK", "/run/tuxedo-control.sock")
+MAP = {
+    "power-saver": os.environ.get("CONTROLD_SAV", "Max Energy Save"),
+    "balanced": os.environ.get("CONTROLD_BAL", "Quiet"),
+    "performance": os.environ.get("CONTROLD_PERF", "High Performance"),
+}
+RESYNC_DELAY = float(os.environ.get("RESYNC_DELAY", "4"))
+POLL_INTERVAL = float(os.environ.get("POLL_INTERVAL", "30"))
+
+
+def log(msg):
+    print(msg, flush=True)
+
+
+def tlp_profile():
+    out = subprocess.run(["busctl", "--json=short", "get-property", *PPD, "ActiveProfile"],
+                         capture_output=True, text=True, timeout=10)
+    if out.returncode != 0:
+        raise RuntimeError(out.stderr.strip() or "busctl get-property failed")
+    return json.loads(out.stdout)["data"]
+
+
+def controld(cmd):
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+        s.settimeout(5)
+        s.connect(SOCK)
+        s.sendall((cmd + "\n").encode())
+        buf = b""
+        while not buf.endswith(b"\n"):
+            chunk = s.recv(65536)
+            if not chunk:
+                break
+            buf += chunk
+    return buf.decode().strip()
+
+
+class Syncer:
+    def __init__(self):
+        self.applied = None   # TLP profile we last mapped
+
+    def sync(self, reason, force=False):
+        try:
+            prof = tlp_profile()
+            want = MAP.get(prof)
+            if want is None or (prof == self.applied and not force):
+                return
+            active = json.loads(controld("LISTPROFILES")).get("active")
+            resp = "OK" if active == want else controld(f"ACTIVATE {want}")
+            if resp == "OK":
+                if active != want:
+                    log(f"{reason}: TLP {prof} -> controld '{want}' (was '{active}')")
+                self.applied = prof
+            else:
+                log(f"{reason}: controld rejected '{want}': {resp}")
+        except (RuntimeError, OSError, KeyError, ValueError, subprocess.TimeoutExpired) as err:
+            log(f"{reason}: sync skipped: {err}")
+
+
+def main():
+    mon = subprocess.Popen(
+        ["gdbus", "monitor", "--system", "--dest", PPD[0], "--object-path", PPD[1]],
+        stdout=subprocess.PIPE, text=True, bufsize=1)
+    sy = Syncer()
+    sy.sync("start", force=True)
+    next_poll = time.monotonic() + POLL_INTERVAL
+    resync_at = None
+    while True:
+        deadline = min(next_poll, resync_at or next_poll)
+        ready, _, _ = select.select([mon.stdout], [], [], max(0, deadline - time.monotonic()))
+        now = time.monotonic()
+        if ready:
+            line = mon.stdout.readline()
+            if not line:
+                log("gdbus monitor exited")
+                return 1
+            if "ActiveProfile" in line:
+                sy.sync("profile change")
+                resync_at = now + RESYNC_DELAY
+            continue
+        if resync_at is not None and now >= resync_at:
+            sy.sync("resync")
+            resync_at = None
+        if now >= next_poll:
+            sy.sync("poll")
+            next_poll = now + POLL_INTERVAL
+
+
+if __name__ == "__main__":
+    sys.exit(main())
