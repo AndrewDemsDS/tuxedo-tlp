@@ -182,7 +182,7 @@ profile changes, so a profile picked in the GUI holds until the next TLP switch.
 ## AI assistance
 
 This project (the plugin, the writeup, and the reverse-engineering of the
-`uniwill_wmi`/`uniwill_laptop` conflict) was developed with AI assistance (Claude Code),
+`uniwill_wmi`/`uniwill_laptop` conflict) was developed with AI assistance,
 working from `tuxedo-drivers`' GPL kernel source and live verification on the reference
 machine. I reviewed and tested the plugin (including a live `tlp setcharge` round trip)
 before committing it. The TCC power-saver sync was written the same way and tested by
