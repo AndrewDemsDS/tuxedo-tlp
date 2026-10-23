@@ -10,6 +10,11 @@
 # applied, so a profile picked by hand in the GUI stays until TLP switches
 # again. A failed sync (daemon not up yet) is retried on the next poll.
 #
+# A profile change is applied only once TLP has held it for SETTLE_DELAY
+# seconds. Something on this laptop can flip tlp-pd between balanced and
+# performance every few seconds; following each flip swapped the fan curve
+# and started and stopped the fan.
+#
 # Mapping (environment, defaults are tuxedo-controld built-ins):
 #   CONTROLD_SAV  power-saver  -> "Max Energy Save"
 #   CONTROLD_BAL  balanced     -> "Quiet"
@@ -32,7 +37,7 @@ MAP = {
     "balanced": os.environ.get("CONTROLD_BAL", "Quiet"),
     "performance": os.environ.get("CONTROLD_PERF", "High Performance"),
 }
-RESYNC_DELAY = float(os.environ.get("RESYNC_DELAY", "4"))
+SETTLE_DELAY = float(os.environ.get("SETTLE_DELAY", "10"))
 POLL_INTERVAL = float(os.environ.get("POLL_INTERVAL", "30"))
 
 
@@ -91,9 +96,9 @@ def main():
     sy = Syncer()
     sy.sync("start", force=True)
     next_poll = time.monotonic() + POLL_INTERVAL
-    resync_at = None
+    settle_at = None
     while True:
-        deadline = min(next_poll, resync_at or next_poll)
+        deadline = min(next_poll, settle_at or next_poll)
         ready, _, _ = select.select([mon.stdout], [], [], max(0, deadline - time.monotonic()))
         now = time.monotonic()
         if ready:
@@ -102,13 +107,13 @@ def main():
                 log("gdbus monitor exited")
                 return 1
             if "ActiveProfile" in line:
-                sy.sync("profile change")
-                resync_at = now + RESYNC_DELAY
+                settle_at = now + SETTLE_DELAY
             continue
-        if resync_at is not None and now >= resync_at:
-            sy.sync("resync")
-            resync_at = None
-        if now >= next_poll:
+        if settle_at is not None and now >= settle_at:
+            sy.sync("profile change")
+            settle_at = None
+            next_poll = now + POLL_INTERVAL
+        if settle_at is None and now >= next_poll:
             sy.sync("poll")
             next_poll = now + POLL_INTERVAL
 
