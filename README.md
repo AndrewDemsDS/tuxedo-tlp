@@ -1,5 +1,7 @@
 # tuxedo-tlp
 
+[![CI](https://github.com/AndrewDemsDS/tuxedo-tlp/actions/workflows/ci.yml/badge.svg)](https://github.com/AndrewDemsDS/tuxedo-tlp/actions/workflows/ci.yml)
+
 A TLP battery-care plugin for TUXEDO laptops on the **Uniwill EC path**: boards where
 charge protection is a coarse 3-level "charging profile", not the percentage
 `charge_control_start/end_threshold` pair TLP already supports for Clevo-chassis TUXEDOs.
@@ -168,6 +170,19 @@ profile changes, so a profile picked in the GUI holds until the next TLP switch.
   touch `/dev/tuxedo_io` at all, it's a separate sysfs group, so it's safe to run
   alongside any of those. It's TLP's own `bat.d/70-tuxedo` it's meant to pre-empt, not a
   fan controller.
+
+## Development
+
+CI runs on every push and pull request:
+
+- `tests/plugin-test.sh` drives the battery plugin through detection, reads and writes
+  against a fake sysfs, using TLP's real helper functions (`sh tests/plugin-test.sh`, needs
+  TLP installed). CI runs it under dash and bash.
+- `tests/controld_sync_test.py` runs `tuxedo-tlp-controld-sync` against a fake `tlp-pd`
+  and a fake `tuxedo-controld` socket and checks the settle delay
+  (`python3 -I tests/controld_sync_test.py`).
+- shellcheck (as dash), ruff (`ruff.toml`), `systemd-analyze verify` on the units, and a
+  check that `aur/.SRCINFO` matches the PKGBUILD, plus namcap.
 
 ## Related
 

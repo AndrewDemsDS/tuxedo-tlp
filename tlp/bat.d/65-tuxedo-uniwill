@@ -219,6 +219,8 @@ batdrv_write_thresholds () {
     fi
 }
 
+# $1 is an optional format that TLP passes from tlp-stat; other callers omit it.
+# shellcheck disable=SC2120
 batdrv_calc_soc () {
     soc_calc "$1"
 }
@@ -310,6 +312,7 @@ batdrv_show_battery_data () {
 batdrv_check_soc_gt_stop () {
     local soc stop
 
+    # shellcheck disable=SC2119
     if soc="$(batdrv_calc_soc)"; then
         stop="$(batdrv_read_threshold stop 0)"
         if [ -n "$stop" ] && [ "$soc" -gt "$stop" ]; then

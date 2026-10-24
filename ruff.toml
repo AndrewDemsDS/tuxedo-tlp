@@ -1,0 +1,6 @@
+# The sync scripts have no .py suffix, so CI passes them to ruff by name.
+target-version = "py311"
+line-length = 100
+
+[lint]
+select = ["E", "F", "W", "B", "PLW", "EXE"]

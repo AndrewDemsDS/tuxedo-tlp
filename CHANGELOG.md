@@ -7,6 +7,11 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+- CI (GitHub Actions): plugin tests against TLP's real helpers under dash and bash, sync
+  tests with a fake `tlp-pd` and controld, shellcheck, ruff, `systemd-analyze verify`, and a
+  `.SRCINFO`/namcap check for the PKGBUILD.
+
 ## [0.1.0] - 2026-10-24
 
 First tagged release.

@@ -47,7 +47,7 @@ def log(msg):
 
 def tlp_profile():
     out = subprocess.run(["busctl", "--json=short", "get-property", *PPD, "ActiveProfile"],
-                         capture_output=True, text=True, timeout=10)
+                         check=False, capture_output=True, text=True, timeout=10)
     if out.returncode != 0:
         raise RuntimeError(out.stderr.strip() or "busctl get-property failed")
     return json.loads(out.stdout)["data"]
