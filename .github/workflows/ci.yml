@@ -28,12 +28,18 @@ jobs:
         run: >
           uvx ruff check --config ruff.toml
           tcc-sync/tuxedo-tlp-controld-sync tcc-sync/tuxedo-tlp-tcc-sync tests/controld_sync_test.py
-      # systemd-analyze checks that ExecStart= exists, so install the scripts first.
+      # systemd-analyze checks that ExecStart= exists and that ordered units load, so install
+      # the scripts and stub the services they order after (not installed on the runner).
       - name: systemd-analyze verify
         run: |
           sudo install -m755 tcc-sync/tuxedo-tlp-controld-sync tcc-sync/tuxedo-tlp-tcc-sync /usr/bin/
-          systemd-analyze verify tcc-sync/tuxedo-tlp-controld-sync.service \
-            tcc-sync/tuxedo-tlp-tcc-sync.service
+          stubs=$(mktemp -d)
+          for u in tuxedo-control tccd tlp tlp-pd; do
+            printf '[Service]\nExecStart=/bin/true\n' > "$stubs/$u.service"
+          done
+          # The trailing colon keeps the default unit search path after the stubs.
+          SYSTEMD_UNIT_PATH="$stubs:" systemd-analyze verify \
+            tcc-sync/tuxedo-tlp-controld-sync.service tcc-sync/tuxedo-tlp-tcc-sync.service
 
   sync:
     name: controld sync (fake tlp-pd + controld)
