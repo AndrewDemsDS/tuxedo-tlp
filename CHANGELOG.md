@@ -25,7 +25,7 @@ First tagged release.
 - `tuxedo-tlp-controld-sync`: the same for [Tuxedo Control](https://github.com/AndrewDemsDS/tuxedo-control)'s
   `tuxedo-controld` in place of TCC (power-saver to Max Energy Save, balanced to Quiet,
   performance to High Performance).
-- AUR packaging as `tuxedo-tlp-git` (`aur/`).
+- Arch packaging as `tuxedo-tlp-git` (`aur/PKGBUILD`, ready for the AUR but not published there).
 
 ### Fixed
 - Leaving power-saver turns CPU boost back on (`CPU_BOOST_ON_AC/BAT=1` set explicitly).

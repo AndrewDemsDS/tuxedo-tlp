@@ -61,9 +61,9 @@ sudo modprobe uniwill_wmi
 
 ## Install
 
-**Arch/CachyOS (AUR):** `yay -S tuxedo-tlp-git` pulls in `tlp` and `tuxedo-drivers-dkms`
-automatically and sets an 80% charge ceiling out of the box; see [`aur/`](aur) for the
-PKGBUILD.
+**Arch/CachyOS:** `cd aur && makepkg -si` builds `tuxedo-tlp-git`, pulls in `tlp` and
+`tuxedo-drivers-dkms`, and sets an 80% charge ceiling out of the box. The package is not on
+the AUR yet.
 
 **Manual:** requires [`tuxedo-drivers`](https://gitlab.com/tuxedocomputers/development/packages/tuxedo-drivers)
 (AUR: `tuxedo-drivers-dkms`) installed and bound as above, and `tlp` installed.
