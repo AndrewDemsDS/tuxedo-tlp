@@ -7,6 +7,7 @@ arch=('any')
 url="https://github.com/AndrewDemsDS/tuxedo-tlp"
 license=('MIT')
 depends=('tlp' 'tuxedo-drivers-dkms' 'python' 'glib2' 'systemd')
+makedepends=('git')
 optdepends=('tlp-pd: power profile D-Bus API that tuxedo-tlp-tcc-sync follows'
             'tuxedo-control-center-bin: fan and brightness side of the power-saver mirror (tccd backend)'
             'tuxedo-control: fan and EC profile side of the power-saver mirror (tuxedo-controld backend)')

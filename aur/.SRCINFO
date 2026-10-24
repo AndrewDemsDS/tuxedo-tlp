@@ -6,6 +6,7 @@ pkgbase = tuxedo-tlp-git
 	install = tuxedo-tlp-git.install
 	arch = any
 	license = MIT
+	makedepends = git
 	depends = tlp
 	depends = tuxedo-drivers-dkms
 	depends = python

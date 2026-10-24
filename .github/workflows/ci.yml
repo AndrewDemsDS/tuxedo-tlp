@@ -71,5 +71,8 @@ jobs:
           useradd -m builder
           cp -r aur /home/builder/aur && chown -R builder /home/builder/aur
           su builder -c 'cd ~/aur && makepkg --printsrcinfo' | diff -u aur/.SRCINFO -
+      # namcap exits 0 even with findings, so fail on any output.
       - name: namcap
-        run: namcap aur/PKGBUILD
+        run: |
+          out=$(namcap aur/PKGBUILD)
+          [ -z "$out" ] || { echo "$out"; exit 1; }
