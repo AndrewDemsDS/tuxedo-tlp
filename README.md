@@ -135,7 +135,7 @@ power-saver does not restore brightness, because TCC's default profile doesn't s
 
 ### With tuxedo-controld instead of TCC
 
-If [`tuxedo-control`](https://github.com/AndrewDemsDS/tuxedo-control-nix) runs the fans in
+If [Tuxedo Control](https://github.com/AndrewDemsDS/tuxedo-control) runs the fans in
 place of `tccd`, use `tuxedo-tlp-controld-sync` instead. It follows the same `tlp-pd`
 `ActiveProfile` and activates a `tuxedo-controld` profile over `/run/tuxedo-control.sock`:
 
@@ -171,8 +171,8 @@ profile changes, so a profile picked in the GUI holds until the next TLP switch.
 
 ## Related
 
-- [`tuxedo-control-nix`](../tuxedo-control-nix): a from-scratch Rust daemon + NixOS
-  module for the same board's `/dev/tuxedo_io` ioctl interface (fan control, performance
+- [Tuxedo Control](https://github.com/AndrewDemsDS/tuxedo-control): a from-scratch Rust
+  daemon (Arch package, NixOS module, any systemd distro) for the same board's `/dev/tuxedo_io` ioctl interface (fan control, performance
   profiles). Different control surface (ioctl vs. this plugin's plain sysfs), no overlap.
 - [`infinitybook-acpi`](../infinitybook-acpi): NixOS-side ACPI fixes and EC power tuning
   for the same physical machine's NixOS boot, including the native

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # tuxedo-tlp-controld-sync - follow TLP's power profile with a tuxedo-controld profile.
 #
-# Same split as tuxedo-tlp-tcc-sync, with tuxedo-controld (tuxedo-control-nix) in
+# Same split as tuxedo-tlp-tcc-sync, with tuxedo-controld (Tuxedo Control) in
 # place of TCC's tccd: TLP owns the CPU and the charge ceiling, tuxedo-controld
 # owns fans, the EC performance mode and the keyboard backlight.
 #
