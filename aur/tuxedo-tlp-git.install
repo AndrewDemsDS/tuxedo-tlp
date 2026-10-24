@@ -47,4 +47,10 @@ EOF
 
 post_upgrade() {
     post_install
+    # 0.1.0 and earlier only hooked the controld sync into multi-user.target, so it stayed
+    # down after tuxedo-control restarted (sleep, upgrades). Re-enable to add the new link.
+    if systemctl is-enabled --quiet tuxedo-tlp-controld-sync.service 2>/dev/null; then
+        systemctl reenable tuxedo-tlp-controld-sync.service >/dev/null 2>&1
+        systemctl start tuxedo-tlp-controld-sync.service >/dev/null 2>&1
+    fi
 }

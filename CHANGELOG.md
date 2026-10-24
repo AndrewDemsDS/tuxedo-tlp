@@ -13,6 +13,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `.SRCINFO`/namcap check for the PKGBUILD.
 
 ### Fixed
+- `tuxedo-tlp-controld-sync` starts again whenever `tuxedo-control` starts. Before, stopping
+  `tuxedo-control` (around sleep or on upgrade) took the sync down for good. Upgrading the
+  package re-enables the unit to add the new link.
 - PKGBUILD lists `git` in `makedepends` (namcap).
 
 ## [0.1.0] - 2026-10-24

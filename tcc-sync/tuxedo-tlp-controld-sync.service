@@ -2,6 +2,8 @@
 Description=Follow TLP's power profile with a tuxedo-controld profile
 After=tuxedo-control.service tlp.service tlp-pd.service
 Wants=tlp-pd.service
+# Requires= stops this unit with tuxedo-control (e.g. around sleep). The Install line
+# below starts it again whenever tuxedo-control starts.
 Requires=tuxedo-control.service
 
 [Service]
@@ -15,4 +17,4 @@ PrivateTmp=yes
 NoNewPrivileges=yes
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target tuxedo-control.service
